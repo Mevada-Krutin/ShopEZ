@@ -10,7 +10,8 @@ const SliderBar = ({ products, title, timer }) => {
           {title}
           {timer && (
             <span className="ml-3 text-xs font-medium text-red-500 bg-red-100 dark:bg-red-900 px-2 py-1 rounded-full">
-              ⏰ Limited Time
+              ⏰ Limited Time Offer
+              5:00:00
             </span>
           )}
         </h2>

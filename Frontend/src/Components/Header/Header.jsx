@@ -25,11 +25,12 @@ export default function Header() {
         </button>
 
         {/* Logo */}
+        <img src="/logo.jpg" alt="Logo" className="w-10 h-10 rounded-3xl object-cover"/>
         <Link
           to="/"
           className="ml-2 text-white font-bold italic text-2xl font-sans tracking-wide hover:opacity-90"
         >
-          ShopEZ E-commerce Application 
+          ShopEZ
         </Link>
 
         {/* Spacer */}

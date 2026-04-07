@@ -4,12 +4,13 @@ import { Link } from 'react-router-dom';
 import TotalViewmain from './TotalViewmain';
 
 // Components
-import CartItem from './CartItem';
+import CartItem from './Cartitem';
 // import TotalViewmain from './TotalViewmain';
 import EmptyCart from './EmptyCart';
 
 export default function Cart() {
   const { cartItems } = useSelector((state) => state.cart);
+  
 
   return (
     <>

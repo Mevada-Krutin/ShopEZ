@@ -1,4 +1,8 @@
 import Product from "../models/product.js";
+import fs from "fs";
+import path from "path";
+import AdmZip from "adm-zip";
+import csvParser from "csv-parser";
 
 export const getAllProducts = async (req, res) => {
   try {
@@ -21,14 +25,16 @@ export const getProductById = async (req, res) => {
 
 export const addProduct = async (req, res) => {
   try {
-    const { title, price, description, category } = req.body;
+    const { title, price, description, category, subcategory, stock } = req.body;
     const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
 
     if (!title || !price || !category || !imagePath) {
       return res.status(400).json({ error: "title, price, category, and image are required" });
     }
 
-    const newProduct = new Product({ title, price, description, category, image: imagePath });
+    const newProduct = new Product({ title, price, description, category, image: imagePath , subcategory
+, stock
+    });
     await newProduct.save();
 
     res.status(201).json({ message: "Product added", product: newProduct });
@@ -56,3 +62,60 @@ export const deleteProduct = async (req, res) => {
     res.status(500).json({ message: "Error deleting product" });
   }
 };
+
+// export const bulkUploadProducts = async (req, res) => {
+//   try {
+//     if (!req.files || !req.files.products || !req.files.images) {
+//       return res.status(400).json({ error: "CSV file and Images ZIP are required" });
+//     }
+
+//     const csvFilePath = req.files.products[0].path;
+//     const zipFilePath = req.files.images[0].path;
+
+//     // Extract images ZIP
+//     const zip = new AdmZip(zipFilePath);
+//     const imagesDir = path.join("uploads", "images");
+//     if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir, { recursive: true });
+//     zip.extractAllTo(imagesDir, true);
+
+//     // Parse CSV
+//     const products = await new Promise((resolve, reject) => {
+//       const results = [];
+//       fs.createReadStream(csvFilePath)
+//         .pipe(csvParser())
+//         .on("data", (row) => {
+//           const imageFile = row.image?.trim();
+//           const imagePath = imageFile && fs.existsSync(path.join(imagesDir, imageFile))
+//             ? `/uploads/images/${imageFile}`
+//             : null;
+
+//           // Only add product if all required fields exist
+//           if (row.title && row.price && row.category && row.subcategory && row.stock && imagePath) {
+//             results.push({
+//               title: row.title,
+//               price: Number(row.price),
+//               discountPrice: row.discountPrice ? Number(row.discountPrice) : 0,
+//               category: row.category,
+//               subcategory: row.subcategory,
+//               stock: Number(row.stock),
+//               status: row.status || "draft",
+//               description: row.description || "",
+//               image: imagePath
+//             });
+//           }
+//         })
+//         .on("end", () => resolve(results))
+//         .on("error", (err) => reject(err));
+//     });
+
+//     if (products.length === 0) {
+//       return res.status(400).json({ error: "No valid products found in CSV" });
+//     }
+
+//     await Product.insertMany(products);
+//     res.status(201).json({ message: "Products uploaded successfully", count: products.length });
+
+//   } catch (err) {
+//     res.status(500).json({ error: "Bulk upload failed", details: err.message });
+//   }
+// };

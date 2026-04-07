@@ -4,7 +4,8 @@ import { useContext, useState } from "react";
 import { DataContext } from "../../Context/DataProvider";
 import { addToCart } from "../../Redux/actions/cartActions";
 import LoginDialog from "../Login/Loginialog";
-import { FaShoppingCart, FaBolt } from "react-icons/fa";
+import { FaShoppingCart, FaBolt, FaHeart } from "react-icons/fa";
+import { addToWishlist } from "../../Redux/actions/wishlistActions";
 
 const ActionItem = ({ product }) => {
   const navigate = useNavigate();
@@ -22,6 +23,12 @@ const ActionItem = ({ product }) => {
       setOpen(true);
     }
   };
+
+const handleAddToWishlist = (product) => {
+  dispatch(addToWishlist(product));
+  alert("Added to Wishlist ❤️");
+};
+
 
   return (
     <div className="min-w-[40%] pt-10 pl-16 lg:pt-5 lg:pl-10 sm:pl-10 sm:pt-5">
@@ -64,6 +71,16 @@ const ActionItem = ({ product }) => {
           <FaBolt className="h-5 w-5 mr-2" />
           Buy Now
         </Link>
+
+        {/* <button onClick={() => addToWishlist(product)}>
+          <FaHeart className="text-gray-500 hover:text-red-500" />
+        </button> */}
+        <button onClick={() => handleAddToWishlist(product)}
+        className="px-3 py-1 bg-pink-500 text-white rounded hover:bg-pink-600">
+          ❤️ Add to Wishlist
+        </button>
+
+
       </div>
 
       <LoginDialog open={open} setopen={setOpen} />

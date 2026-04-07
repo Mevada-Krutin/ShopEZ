@@ -28,6 +28,14 @@ export const addToCart = async (req, res) => {
     } else {
       cart.items.push({ productId, quantity });
     }
+
+    // ✅ Update total price dynamically
+    cart.totalPrice = 0;
+    for (const item of cart.items) {
+      const p = await productId.findById(item.productId);
+      if (p) cart.totalPrice += p.price * item.quantity;
+    }
+
     await cart.save();
     res.json(cart.items);
   } catch (err) {

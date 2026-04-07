@@ -7,7 +7,7 @@ function TotalViewmain({ cartItems }) {
     const calculateTotalPrice = (items) => {
       let total = 0;
       items.forEach((item) => {
-        total += item.price; // ✅ Now assumes each item has a single price (not item.price.mrp)
+        total += item.price * item.qty; // ✅ Now assumes each item has a single price (not item.price.mrp)
       });
       return total;
     };
@@ -27,7 +27,7 @@ function TotalViewmain({ cartItems }) {
       </div>
       <div className="px-6 py-4 text-sm">
         <p className="mb-5 flex justify-between">
-          <span>Price ({cartItems?.length} item)</span>
+          <span>Price ({cartItems?.length} itemitem{cartItems.length > 1 ? 's' : ''})</span>
           <span>₹{formatPrice(price)}</span>
         </p>
         <p className="mb-5 flex justify-between">

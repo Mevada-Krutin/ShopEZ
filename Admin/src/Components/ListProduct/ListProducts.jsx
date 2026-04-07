@@ -7,15 +7,15 @@ const ListProducts = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [editProduct, setEditProduct] = useState(null);
-  const [updatedData, setUpdatedData] = useState({ title: "", price: "" });
+  const [updatedData, setUpdatedData] = useState({ title: "", price: "", stock: 0 });
 
-  // ✅ New filter state
   const [filters, setFilters] = useState({
     category: "all",
     sort: "none",
+    search: "",
   });
 
-  const token = localStorage.getItem("auth-token");
+  const token = localStorage.getItem("admin-token");
 
   const fetchProducts = async () => {
     try {
@@ -23,7 +23,7 @@ const ListProducts = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(res.data);
-      setFilteredProducts(res.data); // ✅ Initial
+      setFilteredProducts(res.data);
     } catch (err) {
       console.error("Error fetching products:", err);
       setError(err.response?.data?.message || "Failed to load products");
@@ -36,19 +36,27 @@ const ListProducts = () => {
     fetchProducts();
   }, []);
 
-  // ✅ Filter + Sort Logic
+  // Filter, search, and sort
   useEffect(() => {
     let updated = [...products];
 
+    // Filter by category
     if (filters.category !== "all") {
       updated = updated.filter((p) => p.category === filters.category);
     }
 
-    if (filters.sort === "price-asc") {
-      updated.sort((a, b) => a.price - b.price);
-    } else if (filters.sort === "price-desc") {
-      updated.sort((a, b) => b.price - a.price);
+    // Search by title
+    if (filters.search) {
+      updated = updated.filter((p) =>
+        p.title.toLowerCase().includes(filters.search.toLowerCase())
+      );
     }
+
+    // Sort
+    if (filters.sort === "price-asc") updated.sort((a, b) => a.price - b.price);
+    else if (filters.sort === "price-desc") updated.sort((a, b) => b.price - a.price);
+    else if (filters.sort === "stock-asc") updated.sort((a, b) => a.stock - b.stock);
+    else if (filters.sort === "stock-desc") updated.sort((a, b) => b.stock - a.stock);
 
     setFilteredProducts(updated);
   }, [filters, products]);
@@ -72,7 +80,7 @@ const ListProducts = () => {
 
   const startEdit = (product) => {
     setEditProduct(product._id);
-    setUpdatedData({ title: product.title, price: product.price });
+    setUpdatedData({ title: product.title, price: product.price, stock: product.stock || 0 });
   };
 
   const handleUpdateChange = (e) => {
@@ -84,9 +92,7 @@ const ListProducts = () => {
       await axios.put(`http://localhost:3001/api/products/${id}`, updatedData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setProducts(
-        products.map((p) => (p._id === id ? { ...p, ...updatedData } : p))
-      );
+      setProducts(products.map((p) => (p._id === id ? { ...p, ...updatedData } : p)));
       setEditProduct(null);
     } catch (err) {
       console.error("Update error:", err);
@@ -101,23 +107,21 @@ const ListProducts = () => {
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-4">Product List</h2>
 
-      {/* ✅ FILTER BAR */}
+      {/* Filters: category, sort, search */}
       <div className="flex flex-wrap gap-4 mb-4">
-        {/* Category Filter */}
         <select
           value={filters.category}
           onChange={(e) => handleFilterChange({ category: e.target.value })}
           className="border p-2 rounded"
         >
           <option value="all">All Categories</option>
-          <option value="top-offer">top-offer</option>
-           <option value="deal-of-the-day">deal-of-the-day</option>
+          <option value="top-offer">Top Offer</option>
+          <option value="deal-of-the-day">Deal of the Day</option>
           <option value="Electronics">Electronics</option>
           <option value="Furniture">Furniture</option>
           <option value="Shoes">Shoes</option>
         </select>
 
-        {/* Sort Filter */}
         <select
           value={filters.sort}
           onChange={(e) => handleFilterChange({ sort: e.target.value })}
@@ -126,7 +130,17 @@ const ListProducts = () => {
           <option value="none">Sort By</option>
           <option value="price-asc">Price: Low → High</option>
           <option value="price-desc">Price: High → Low</option>
+          <option value="stock-asc">Stock: Low → High</option>
+          <option value="stock-desc">Stock: High → Low</option>
         </select>
+
+        <input
+          type="text"
+          placeholder="Search by title..."
+          value={filters.search}
+          onChange={(e) => handleFilterChange({ search: e.target.value })}
+          className="border p-2 rounded w-full md:w-1/3"
+        />
       </div>
 
       <table className="min-w-full bg-white border">
@@ -136,6 +150,7 @@ const ListProducts = () => {
             <th className="p-3 border">Title</th>
             <th className="p-3 border">Category</th>
             <th className="p-3 border">Price</th>
+            <th className="p-3 border">Stock</th>
             <th className="p-3 border">Actions</th>
           </tr>
         </thead>
@@ -145,12 +160,11 @@ const ListProducts = () => {
               <tr key={product._id} className="border-b">
                 <td className="p-3 border">
                   <img
-                    src={`http://localhost:3001${product.image}`}
+                    src={product.image.startsWith("http") ? product.image : `http://localhost:3001${product.image}`}
                     alt={product.title}
                     className="w-12 h-12 object-cover rounded"
                   />
                 </td>
-
                 <td className="p-3 border">
                   {editProduct === product._id ? (
                     <input
@@ -164,9 +178,7 @@ const ListProducts = () => {
                     product.title
                   )}
                 </td>
-
                 <td className="p-3 border">{product.category}</td>
-
                 <td className="p-3 border">
                   {editProduct === product._id ? (
                     <input
@@ -180,7 +192,19 @@ const ListProducts = () => {
                     `₹${product.price}`
                   )}
                 </td>
-
+                <td className="p-3 border">
+                  {editProduct === product._id ? (
+                    <input
+                      type="number"
+                      name="stock"
+                      value={updatedData.stock}
+                      onChange={handleUpdateChange}
+                      className="border p-1 rounded w-full"
+                    />
+                  ) : (
+                    product.stock
+                  )}
+                </td>
                 <td className="p-3 border flex gap-2">
                   {editProduct === product._id ? (
                     <>
@@ -218,7 +242,7 @@ const ListProducts = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="5" className="text-center p-4">
+              <td colSpan="6" className="text-center p-4">
                 No products found.
               </td>
             </tr>

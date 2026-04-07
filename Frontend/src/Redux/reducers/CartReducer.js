@@ -14,14 +14,15 @@ export const cartReducer = (state = initialState, action) => {
         return {
           ...state,
           cartItems: state.cartItems.map((x) =>
-            x._id === existItem._id ? item : x
+            x._id === existItem._id ? { ...x, qty: x.qty + 1 } // ✅ increase quantity properly
+              : x
           ),
         };
       }
 
       return {
         ...state,
-        cartItems: [...state.cartItems, item],
+        cartItems: [...state.cartItems, { ...item, qty: 1 } ],
       };
 
     case actionTypes.REMOVE_FROM_CART:
@@ -40,6 +41,16 @@ export const cartReducer = (state = initialState, action) => {
       return {
         ...state,
         cartItems: action.payload,
+      };
+
+      case actionTypes.UPDATE_CART_QUANTITY:
+      return {
+        ...state,
+        cartItems: state.cartItems.map((item) =>
+          item._id === action.payload.id
+            ? { ...item, qty: action.payload.qty }
+            : item
+        ),
       };
 
     default:

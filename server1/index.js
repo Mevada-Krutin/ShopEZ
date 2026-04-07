@@ -9,7 +9,13 @@ import adminRoutes from "./routes/adminRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 import { createDefaultAdmin } from "./controllers/adminController.js";
+// import wishlistRoutes from "./routes/wishlistRoutes.js";
+// import dotenv from "dotenv";
+
+// dotenv.config();
+
 
 const app = express();
 
@@ -24,13 +30,15 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.use("/api/products", productRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/orders", orderRoutes);
-app.use("/api/users", userRoutes);  // ✅ FIXED
+app.use("/api/users", userRoutes);  
 app.use("/api/cart", cartRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+// app.use("/api/wishlist", wishlistRoutes);
 
 const PORT = 3001;
 const MONGO_URI = "mongodb://127.0.0.1:27017/shopez";

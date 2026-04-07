@@ -1,6 +1,7 @@
 import { createStore, combineReducers, applyMiddleware } from "redux";
 import { thunk } from "redux-thunk"; // ✅ Use named import for Vite
 import { composeWithDevTools } from "redux-devtools-extension";
+import { wishlistReducer } from "./reducers/wishlistReducer";
 
 import {
   getProductsReducer,
@@ -18,6 +19,7 @@ const reducer = combineReducers({
   getProducts: getProductsReducer,
   getProductDetails: getProductDetailsReducer,
   cart: cartReducer,
+  wishlist: wishlistReducer,
 });
 
 const initialState = {

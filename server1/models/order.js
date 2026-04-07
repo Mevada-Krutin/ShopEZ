@@ -8,7 +8,7 @@ const orderSchema = new mongoose.Schema({
       quantity: { type: Number, required: true, default: 1 }
     }
   ],
-  totalPrice: { type: Number, required: true },
+  totalPrice: { type: Number, required: true },   
   address: {
     name: String,
     email: String,
@@ -17,7 +17,10 @@ const orderSchema = new mongoose.Schema({
     state: String,
     pincode: String
   },
-  status: { type: String, default: "pending" },
+  status: { 
+    type: String, 
+    enum: ["Pending", "Cancelled", "Delivered"],
+    default: "Pending", },
   createdAt: { type: Date, default: Date.now }
 });
 
